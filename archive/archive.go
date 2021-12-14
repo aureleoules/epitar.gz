@@ -41,34 +41,42 @@ func Register(config config.Module) {
 	})
 }
 
+func (module *Module) Build() error {
+	str := color.CyanString(" Building '%s' archive module...", module.Name)
+
+	s := spinner.New(spinner.CharSets[4], 100*time.Millisecond, spinner.WithSuffix(str))
+	s.Start()
+
+	tar, err := archive.TarWithOptions(module.Path, &archive.TarOptions{})
+	if err != nil {
+		return err
+	}
+
+	resp, err := dockerClient.ImageBuild(context.Background(), tar, types.ImageBuildOptions{
+		Dockerfile: "Dockerfile",
+		Tags:       []string{"epitar-module-" + module.Name},
+	})
+
+	if err != nil {
+		return err
+	}
+
+	// Wait for build to finish
+	scanner := bufio.NewScanner(resp.Body)
+	for scanner.Scan() {
+	}
+
+	s.Stop()
+	color.Cyan("Built.")
+
+	return nil
+}
+
 func BuildModules() error {
 	for _, module := range modules {
-		str := color.CyanString(" Building '%s' archive module...", module.Name)
-
-		s := spinner.New(spinner.CharSets[4], 100*time.Millisecond, spinner.WithSuffix(str)) // Build our new spinner
-		s.Start()
-
-		tar, err := archive.TarWithOptions(module.Path, &archive.TarOptions{})
-		if err != nil {
+		if err := module.Build(); err != nil {
 			return err
 		}
-
-		resp, err := dockerClient.ImageBuild(context.Background(), tar, types.ImageBuildOptions{
-			Dockerfile: "Dockerfile",
-			Tags:       []string{"epitar-module-" + module.Name},
-		})
-
-		if err != nil {
-			return err
-		}
-
-		// Wait for build to finish
-		scanner := bufio.NewScanner(resp.Body)
-		for scanner.Scan() {
-		}
-
-		s.Stop()
-		color.Cyan("Built.")
 	}
 
 	return nil
@@ -77,7 +85,7 @@ func BuildModules() error {
 func (module *Module) Run() error {
 	str := color.GreenString(" Running '%s' archive module...", module.Name)
 
-	s := spinner.New(spinner.CharSets[4], 100*time.Millisecond, spinner.WithSuffix(str), spinner.WithFinalMSG(color.GreenString("Done.\n"))) // Build our new spinner
+	s := spinner.New(spinner.CharSets[4], 100*time.Millisecond, spinner.WithSuffix(str), spinner.WithFinalMSG(color.GreenString("Done.\n")))
 	s.Start()
 
 	go func(c *spinner.Spinner) {
@@ -159,9 +167,35 @@ func RunModules() error {
 		if stop {
 			break
 		}
-		module.Run()
+
+		if err := module.Run(); err != nil {
+			return err
+		}
 	}
 
+	return nil
+}
+
+func (module *Module) Stop() error {
+	if module.ContainerID == "" {
+		return nil
+	}
+
+	str := color.YellowString(" Stopping '%s' archive module...", module.Name)
+
+	s := spinner.New(spinner.CharSets[4], 100*time.Millisecond, spinner.WithSuffix(str), spinner.WithFinalMSG(color.YellowString("Stopped.\n")))
+	s.Start()
+
+	err := dockerClient.ContainerRemove(context.Background(), module.ContainerID, types.ContainerRemoveOptions{
+		Force: true,
+	})
+
+	if err != nil {
+		color.Red("Error stopping container: %s", err)
+		return err
+	}
+
+	s.Stop()
 	return nil
 }
 
@@ -170,25 +204,9 @@ func StopModules() error {
 	stop = true
 
 	for _, module := range modules {
-		if module.ContainerID == "" {
-			continue
-		}
-
-		str := color.YellowString(" Stopping '%s' archive module...", module.Name)
-
-		s := spinner.New(spinner.CharSets[4], 100*time.Millisecond, spinner.WithSuffix(str), spinner.WithFinalMSG(color.YellowString("Stopped.\n")))
-		s.Start()
-
-		err := dockerClient.ContainerRemove(context.Background(), module.ContainerID, types.ContainerRemoveOptions{
-			Force: true,
-		})
-
-		if err != nil {
-			color.Red("Error stopping container: %s", err)
+		if err := module.Stop(); err != nil {
 			return err
 		}
-
-		s.Stop()
 	}
 
 	return nil
