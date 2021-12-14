@@ -3,12 +3,16 @@ package archive
 import (
 	"bufio"
 	"context"
+	"os"
+	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/aureleoules/epitar/config"
 	"github.com/briandowns/spinner"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
 	"github.com/fatih/color"
@@ -86,9 +90,29 @@ func (module *Module) Run() error {
 		}
 	}(s)
 
+	// Resolve absolute path of module
+	output, err := filepath.Abs(config.Cfg.Output)
+	if err != nil {
+		return err
+	}
+
+	source := path.Join(output, module.Name)
+	err = os.MkdirAll(source, 0755)
+	if err != nil {
+		return err
+	}
+
 	cont, err := dockerClient.ContainerCreate(context.Background(), &container.Config{
 		Image: "epitar-module-" + module.Name,
-	}, nil, nil, nil, "")
+	}, &container.HostConfig{
+		Mounts: []mount.Mount{
+			{
+				Type:   mount.TypeBind,
+				Source: source,
+				Target: "/output",
+			},
+		},
+	}, nil, nil, "")
 	if err != nil {
 		color.Red("Error creating container: %s", err)
 		return err
@@ -117,6 +141,15 @@ func (module *Module) Run() error {
 	s.Stop()
 
 	time.Sleep(time.Second * 1)
+
+	err = dockerClient.ContainerRemove(context.Background(), cont.ID, types.ContainerRemoveOptions{
+		Force: true,
+	})
+
+	if err != nil {
+		color.Red("Error removing container: %s", err)
+		return err
+	}
 
 	return nil
 }

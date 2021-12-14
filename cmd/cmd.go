@@ -46,14 +46,13 @@ func Run() {
 						return err
 					}
 
-					var cfg config.Config
-					err = yaml.Unmarshal(yamlFile, &cfg)
+					err = yaml.Unmarshal(yamlFile, &config.Cfg)
 					if err != nil {
 						color.Red("Could not decode config file: %s\n%s", c.String("config"), err)
 						return err
 					}
 
-					for _, module := range cfg.Modules {
+					for _, module := range config.Cfg.Modules {
 						if module.Enabled {
 							archive.Register(module)
 						}

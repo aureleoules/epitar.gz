@@ -1,5 +1,7 @@
 package config
 
+var Cfg Config
+
 type Module struct {
 	Name    string            `yaml:"name"`
 	Path    string            `yaml:"path"`
