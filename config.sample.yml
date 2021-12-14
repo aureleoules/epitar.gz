@@ -1,0 +1,15 @@
+output: archives
+
+modules:
+  - name: akim
+    path: modules/akim
+    enabled: true
+  - name: intra
+    path: modules/intra
+    enabled: false
+    config:
+      login:
+      password:
+  - name: mastercorp
+    path: modules/mastercorp
+    enabled: true
