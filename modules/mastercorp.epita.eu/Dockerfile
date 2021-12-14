@@ -3,4 +3,4 @@ WORKDIR /output
 
 ENV url https://mastercorp.epita.eu/
 
-ENTRYPOINT wget --no-check-certificate -r -np -R "index.html/*" ${url}
+ENTRYPOINT wget -nc --no-check-certificate -r -np -R "index.html/*" ${url}
