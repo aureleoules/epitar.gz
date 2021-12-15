@@ -53,7 +53,7 @@ func Run() {
 					}
 
 					for _, module := range config.Cfg.Modules {
-						if module.Enabled {
+						if module.Enable {
 							archive.Register(module)
 						}
 					}
@@ -71,6 +71,12 @@ func Run() {
 					}
 
 					color.Green("Done archiving.")
+
+					err = archive.IndexModules()
+					if err != nil {
+						color.Red("Error indexing modules: %s", err)
+						return err
+					}
 
 					return nil
 				},
