@@ -17,7 +17,7 @@ COPY src/package.json /app
 
 # Install dependencies
 RUN npm install
-COPY src/* /app
+COPY src/* /app/
 
 # Creating Display
 ENV DISPLAY :99
