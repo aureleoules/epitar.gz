@@ -16,7 +16,7 @@ import (
 )
 
 func (module *Module) Run() error {
-	str := color.GreenString(" Running '%s' archive module...", module.Name)
+	str := color.GreenString(" Running '%s' archive module...", module.Meta.Slug)
 
 	s := spinner.New(spinner.CharSets[4], 100*time.Millisecond, spinner.WithSuffix(str), spinner.WithFinalMSG(color.GreenString("Done.\n")))
 	s.Start()
@@ -37,14 +37,14 @@ func (module *Module) Run() error {
 		return err
 	}
 
-	source := path.Join(output, module.Name)
+	source := path.Join(output, module.Meta.Slug)
 	err = os.MkdirAll(source, 0755)
 	if err != nil {
 		return err
 	}
 
 	cont, err := dockerClient.ContainerCreate(context.Background(), &container.Config{
-		Image: "epitar-module-" + module.Name,
+		Image: "epitar-module-" + module.Meta.Slug,
 	}, &container.HostConfig{
 		Mounts: []mount.Mount{
 			{
@@ -116,7 +116,7 @@ func (module *Module) Stop() error {
 		return nil
 	}
 
-	str := color.YellowString(" Stopping '%s' archive module...", module.Name)
+	str := color.YellowString(" Stopping '%s' archive module...", module.Meta.Name)
 
 	s := spinner.New(spinner.CharSets[4], 100*time.Millisecond, spinner.WithSuffix(str), spinner.WithFinalMSG(color.YellowString("Stopped.\n")))
 	s.Start()

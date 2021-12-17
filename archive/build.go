@@ -12,7 +12,7 @@ import (
 )
 
 func (module *Module) Build() error {
-	str := color.CyanString(" Building '%s' archive module...", module.Name)
+	str := color.CyanString(" Building '%s' archive module...", module.Meta.Slug)
 
 	s := spinner.New(spinner.CharSets[4], 100*time.Millisecond, spinner.WithSuffix(str))
 	s.Start()
@@ -24,7 +24,7 @@ func (module *Module) Build() error {
 
 	resp, err := dockerClient.ImageBuild(context.Background(), tar, types.ImageBuildOptions{
 		Dockerfile: "Dockerfile",
-		Tags:       []string{"epitar-module-" + module.Name},
+		Tags:       []string{"epitar-module-" + module.Meta.Slug},
 	})
 
 	if err != nil {

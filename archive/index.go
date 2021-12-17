@@ -124,7 +124,7 @@ func listIndexableFiles(rootDir string, accept []string) []string {
 }
 
 func (m *Module) Index() error {
-	p := filepath.Join(config.Cfg.Output, m.Name)
+	p := filepath.Join(config.Cfg.Output, m.Meta.Slug)
 	files := listIndexableFiles(p, m.IndexOptions.Files)
 
 	l := len(files)
@@ -158,7 +158,7 @@ func IndexModules() error {
 	}
 
 	for _, m := range modules {
-		color.Magenta("Indexing module %s", m.Name)
+		color.Magenta("Indexing module %s", m.Meta.Name)
 		if err := m.Index(); err != nil {
 			return err
 		}

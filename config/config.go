@@ -2,17 +2,25 @@ package config
 
 var Cfg Config
 
-type IndexOptions struct {
-	Enable bool     `yaml:"enable"`
-	Files  []string `yaml:"files"`
-}
-
 type Module struct {
-	Name         string            `yaml:"name"`
 	Path         string            `yaml:"path"`
 	Options      map[string]string `yaml:"options"`
 	Enable       bool              `yaml:"enable"`
-	IndexOptions IndexOptions      `yaml:"index"`
+	IndexOptions struct {
+		Enable bool     `yaml:"enable"`
+		Files  []string `yaml:"files"`
+	} `yaml:"index"`
+	Meta struct {
+		Name        string `json:"name"`
+		Slug        string `json:"slug"`
+		URL         string `json:"url"`
+		Description string `json:"description"`
+		Logo        string `json:"logo"`
+		Authors     []struct {
+			Name  string `json:"name"`
+			Email string `json:"email"`
+		} `json:"authors"`
+	} `yaml:"meta"`
 }
 
 type IndexConfig struct {

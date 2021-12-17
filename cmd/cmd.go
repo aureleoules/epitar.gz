@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"os"
 
@@ -34,6 +35,21 @@ func loadConfig(path string) error {
 	if err != nil {
 		color.Red("Could not decode config file: %s\n%s", path, err)
 		return err
+	}
+
+	for i := range config.Cfg.Modules {
+		module := &config.Cfg.Modules[i]
+		data, err := os.ReadFile(module.Path + "/module.json")
+		if err != nil {
+			color.Red("Could not read module.json file in %s\n%s", module.Path, err)
+			return err
+		}
+
+		err = json.Unmarshal(data, &config.Cfg.Modules[i].Meta)
+		if err != nil {
+			color.Red("Could not decode module.json file: %s\n%s", module.Path, err)
+			return err
+		}
 	}
 
 	return nil
