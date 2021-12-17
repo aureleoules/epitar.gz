@@ -2,6 +2,18 @@ package config
 
 var Cfg Config
 
+type ModuleMeta struct {
+	Name        string `json:"name"`
+	Slug        string `json:"slug"`
+	URL         string `json:"url"`
+	Description string `json:"description"`
+	Logo        string `json:"logo"`
+	Authors     []struct {
+		Name  string `json:"name"`
+		Email string `json:"email"`
+	} `json:"authors"`
+}
+
 type Module struct {
 	Path         string            `yaml:"path"`
 	Options      map[string]string `yaml:"options"`
@@ -10,17 +22,7 @@ type Module struct {
 		Enable bool     `yaml:"enable"`
 		Files  []string `yaml:"files"`
 	} `yaml:"index"`
-	Meta struct {
-		Name        string `json:"name"`
-		Slug        string `json:"slug"`
-		URL         string `json:"url"`
-		Description string `json:"description"`
-		Logo        string `json:"logo"`
-		Authors     []struct {
-			Name  string `json:"name"`
-			Email string `json:"email"`
-		} `json:"authors"`
-	} `yaml:"meta"`
+	Meta ModuleMeta `yaml:"meta"`
 }
 
 type IndexConfig struct {

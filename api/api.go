@@ -100,5 +100,28 @@ func Serve() {
 		return c.File(path.Join(config.Cfg.Index.Store, "files", id))
 	})
 
+	e.GET("/modules", func(c echo.Context) error {
+		var modules []config.ModuleMeta
+
+		for _, m := range config.Cfg.Modules {
+			if m.Enable {
+				modules = append(modules, m.Meta)
+			}
+		}
+
+		return c.JSON(http.StatusOK, modules)
+	})
+
+	e.GET("/stats", func(c echo.Context) error {
+		// TODO: CACHE
+		stats, err := models.GetStats()
+		if err != nil {
+			c.NoContent(http.StatusInternalServerError)
+			return err
+		}
+
+		return c.JSON(200, stats)
+	})
+
 	e.Start(":1323")
 }

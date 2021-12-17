@@ -81,11 +81,16 @@ func indexPath(path string) error {
 		return nil
 	}
 
+	maxLength := len(keywords)
+	if maxLength > 100 {
+		maxLength = 100
+	}
+
 	meta := models.FileMeta{
 		ID:      hex.EncodeToString(h[:]),
 		Name:    name,
 		Size:    int64(len(data)),
-		Summary: keywords[:100],
+		Summary: keywords[:maxLength],
 	}
 
 	if err := meta.Save(); err != nil {
