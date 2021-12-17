@@ -1,0 +1,13 @@
+{
+    "name": "Past-Exams",
+    "slug": "past-exams",
+    "url": "https://github.com/Epidocs/Past-Exams",
+    "description": "Past subjects and other files, for the benefit of EPITA students. ",
+    "logo": "https://github.com/fluidicon.png",
+    "authors": [
+        {
+            "name": "Aurele Oules",
+            "email": "aurele@oules.com"
+        }
+    ]
+}

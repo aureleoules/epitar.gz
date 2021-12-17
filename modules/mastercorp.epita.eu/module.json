@@ -1,0 +1,13 @@
+{
+    "name": "Mastercorp",
+    "slug": "mastercorp",
+    "url": "https://mastercorp.epita.eu/",
+    "description": "Mastercorp provides PDF scans of various EPITA documents",
+    "logo": "",
+    "authors": [
+        {
+            "name": "Aurele Oules",
+            "email": "aurele@oules.com"
+        }
+    ]
+}

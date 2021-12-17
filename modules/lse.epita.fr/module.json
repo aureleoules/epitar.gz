@@ -1,0 +1,13 @@
+{
+    "name": "LSE EPITA",
+    "slug": "lse-epita",
+    "url": "https://www.lse.epita.fr/",
+    "description": "LSE is one of the three EPITA laboratories. Its goal is to provide students with an environment for learning and improving their skills.",
+    "logo": "https://www.lse.epita.fr/images/logoLSE.png",
+    "authors": [
+        {
+            "name": "Aurele Oules",
+            "email": "aurele@oules.com"
+        }
+    ]
+}

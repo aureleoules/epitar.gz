@@ -1,0 +1,13 @@
+{
+    "name": "Intra Assistants EPITA",
+    "slug": "intra-assistants-epita",
+    "url": "https://intra.assistants.epita.fr",
+    "description": "Intranet Assistants EPITA",
+    "logo": "https://intra.assistants.epita.fr/epita.png",
+    "authors": [
+        {
+            "name": "Aurele Oules",
+            "email": "aurele@oules.com"
+        }
+    ]
+}

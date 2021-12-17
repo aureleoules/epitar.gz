@@ -1,0 +1,13 @@
+{
+    "name": "Epita Algo Cours",
+    "slug": "epita-algo-cours",
+    "url": "https://algo.infoprepa.epita.fr",
+    "description": "Algorithmic courses for EPITA students",
+    "logo": "https://algo.infoprepa.epita.fr/skins/common/images/Algo_prepas_epita_wiki_logo.png",
+    "authors": [
+        {
+            "name": "Aurele Oules",
+            "email": "aurele@oules.com"
+        }
+    ]
+}
