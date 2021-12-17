@@ -1,4 +1,4 @@
-output: archives
+output: ./output
 
 modules:
   - name: akim

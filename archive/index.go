@@ -14,9 +14,10 @@ import (
 
 	"code.sajari.com/docconv/client"
 	"github.com/aureleoules/epitar/config"
+	"github.com/aureleoules/epitar/db"
+	"github.com/aureleoules/epitar/models"
 	"github.com/expectedsh/go-sonic/sonic"
 	"github.com/fatih/color"
-	"github.com/syndtr/goleveldb/leveldb"
 	"golang.org/x/text/runes"
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
@@ -26,7 +27,6 @@ var (
 	transformChain = transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
 	preprocRgx     = regexp.MustCompile(`[^\w]`)
 
-	db            *leveldb.DB
 	docconvClient *client.Client
 	ingester      sonic.Ingestable
 )
@@ -66,41 +66,38 @@ func indexPath(path string) error {
 	}
 
 	h := sha1.Sum(data)
-	fileKey := buildKey("f", h[:])
+	key := hex.EncodeToString(h[:])
 
-	if hashKey, err := db.Has(fileKey, nil); hashKey {
-		if err != nil {
-			return err
-		}
-
+	_, err = models.GetFileMeta(key)
+	if err == nil {
 		color.Yellow("Skipped %s because it already exists", filepath.Base(path))
 		return nil
 	}
 
-	meta := FileMeta{
-		Name: filepath.Base(path),
-		Size: int64(len(data)),
-	}
-
-	keywords := preprocessText(meta.Name, data)
+	name := filepath.Base(path)
+	keywords := preprocessText(name, data)
 	if keywords == "" {
 		color.Yellow("Skipped %s because it has no keywords", filepath.Base(path))
 		return nil
 	}
 
-	// Store metadata
-	err = db.Put(buildKey("m", h[:]), meta.Serialize(), nil)
+	meta := models.FileMeta{
+		ID:      hex.EncodeToString(h[:]),
+		Name:    name,
+		Size:    int64(len(data)),
+		Summary: keywords[:100],
+	}
+
+	if err := meta.Save(); err != nil {
+		return err
+	}
+
+	err = os.WriteFile(filepath.Join(config.Cfg.Index.Store, "files", key), data, 0644)
 	if err != nil {
 		return err
 	}
 
-	// Store data
-	err = db.Put(fileKey, data, nil)
-	if err != nil {
-		return err
-	}
-
-	err = ingester.Push("files", "default", "key:"+hex.EncodeToString(h[:]), keywords, "")
+	err = ingester.Push("files", "default", "key:"+key, keywords, "")
 	if err != nil {
 		return err
 	}
@@ -135,7 +132,11 @@ func (m *Module) Index() error {
 
 	for _, f := range files {
 		fmt.Printf("\rIndexing %s (%d/%d)\n", f, i, l)
-		indexPath(f)
+		err := indexPath(f)
+		if err != nil {
+			return err
+		}
+
 		i++
 	}
 
@@ -148,20 +149,13 @@ func IndexModules() error {
 
 	docconvClient = client.New()
 
-	color.Green("Opening database")
-	db, err = leveldb.OpenFile(config.Cfg.Index.Store, nil)
-	if err != nil {
-		return err
-	}
-
+	db.Init()
 	defer db.Close()
-	color.Green("Database opened")
 
 	ingester, err = sonic.NewIngester("localhost", 1491, "password")
 	if err != nil {
-		return err
+		panic(err)
 	}
-	color.Green("Ingester created")
 
 	for _, m := range modules {
 		color.Magenta("Indexing module %s", m.Name)

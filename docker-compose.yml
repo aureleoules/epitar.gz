@@ -2,9 +2,6 @@ version: "2.0"
 services:
   docconv:
     image: docconv
-    # build:
-    #   context: ./docker
-    #   dockerfile: Dockerfile.docconv
     ports:
       - "8888:8888"
   sonic:
@@ -12,5 +9,5 @@ services:
     ports:
       - 1491:1491
     volumes:
-      - ./sonic/config.cfg:/etc/sonic.cfg
-      - ./sonic:/sonic
+      - ./sonic.cfg:/etc/sonic.cfg
+      - ./data/sonic:/sonic

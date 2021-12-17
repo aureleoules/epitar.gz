@@ -17,6 +17,11 @@ type Module struct {
 
 type IndexConfig struct {
 	Store string `yaml:"store"`
+	Sonic struct {
+		Host     string `yaml:"host"`
+		Port     int    `yaml:"port"`
+		Password string `yaml:"password"`
+	} `yaml:"sonic"`
 }
 
 type Config struct {

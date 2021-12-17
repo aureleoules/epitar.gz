@@ -136,7 +136,7 @@ func (module *Module) Stop() error {
 	return nil
 }
 
-func StopModules() error {
+func stopModules() error {
 	stopCh <- true
 	stop = true
 

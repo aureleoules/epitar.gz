@@ -3,26 +3,40 @@ package cmd
 import (
 	"io/ioutil"
 	"os"
-	"os/signal"
-	"syscall"
 
+	"github.com/aureleoules/epitar/api"
 	"github.com/aureleoules/epitar/archive"
 	"github.com/aureleoules/epitar/config"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"gopkg.in/yaml.v2"
 )
 
-func init() {
-	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-c
-		// Run Cleanup
-		archive.StopModules()
+var logger *zap.Logger
 
-		os.Exit(1)
-	}()
+func init() {
+	c := zap.NewDevelopmentConfig()
+	c.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	logger, _ = c.Build()
+	zap.ReplaceGlobals(logger)
+}
+
+func loadConfig(path string) error {
+	yamlFile, err := ioutil.ReadFile(path)
+	if err != nil {
+		color.Red("Error reading config file")
+		return err
+	}
+
+	err = yaml.Unmarshal(yamlFile, &config.Cfg)
+	if err != nil {
+		color.Red("Could not decode config file: %s\n%s", path, err)
+		return err
+	}
+
+	return nil
 }
 
 func Run() {
@@ -40,15 +54,8 @@ func Run() {
 			{
 				Name: "start",
 				Action: func(c *cli.Context) error {
-					yamlFile, err := ioutil.ReadFile(c.String("config"))
+					err := loadConfig(c.String("config"))
 					if err != nil {
-						color.Red("Error reading config file")
-						return err
-					}
-
-					err = yaml.Unmarshal(yamlFile, &config.Cfg)
-					if err != nil {
-						color.Red("Could not decode config file: %s\n%s", c.String("config"), err)
 						return err
 					}
 
@@ -78,6 +85,18 @@ func Run() {
 						return err
 					}
 
+					return nil
+				},
+			},
+			{
+				Name: "serve",
+				Action: func(c *cli.Context) error {
+					err := loadConfig(c.String("config"))
+					if err != nil {
+						return err
+					}
+
+					api.Serve()
 					return nil
 				},
 			},

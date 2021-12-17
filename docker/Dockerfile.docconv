@@ -1,0 +1,18 @@
+FROM golang:latest
+
+RUN apt update
+RUN apt-get install -y zip
+RUN apt-get install -y poppler-utils
+RUN apt-get install -y wv
+RUN apt-get install -y unrtf
+RUN apt-get install -y tidy
+RUN apt-get install -y lynx
+RUN apt-get install -y libtesseract-dev
+RUN apt-get install -y libleptonica-dev
+RUN apt-get install -y tesseract-ocr-eng
+
+RUN go get -t github.com/otiai10/gosseract
+
+RUN go get -tags ocr code.sajari.com/docconv/...
+
+ENTRYPOINT ["docd"]
