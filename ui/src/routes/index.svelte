@@ -3,50 +3,119 @@
 </script>
 
 <script lang="ts">
-	import {variables} from "$lib/var";
+	import { variables } from '$lib/var';
+	import { onMount } from 'svelte';
 
-	let query = "";
+	let query = '';
 	let results = [];
 
-	function setSearch(q: string) {
-		query = q;
-		console.log(query);
-		window.history.pushState({}, "", `?q=${q}`);
+	onMount(() => {
+		// get url param
+		query = new URLSearchParams(window.location.search).get('q');
+		if (query) {
+			console.log('query', query);
+			search(query);
+		}
+	});
 
-		// fetch data
-		fetch(`${variables.apiUrl}/search?q=${q}`)
-			.then(res => res.json())
-			.then(data => {
-				results = data;
-				console.log(data);
-			}).catch(err => {
+	function search(q: string) {
+		fetch(`${variables.apiUrl}/search?q=${query}`)
+			.then((res) => {
+				if (res.ok) {
+					return res.json();
+				}
+				return [];
+			})
+			.then((res) => {
+				results = res;
+				console.log(res);
+			})
+			.catch((err) => {
 				console.log(err);
 			});
 	}
 
+	function setSearch(q: string) {
+		query = q;
+		window.history.pushState({}, '', `?q=${q}`);
+		search(q);
+	}
 </script>
 
 <svelte:head>
 	<title>epitar.gz search index</title>
 </svelte:head>
 
+<div class="search-page">
+	<article class="search-box">
+		<header>epitar.gz search index</header>
+		<form>
+			<input
+				type="text"
+				name="q"
+				placeholder="thl, assembly, mathematics..."
+				required
+				on:input={(e) => setSearch(e.target.value)}
+			/>
+			<button type="submit">Search</button>
+		</form>
+	</article>
 
-<div>
-	<input type="text" placeholder="Search" on:input={e => setSearch(e.target.value)} />
+	{#if results?.length}
+		<div class="results grid">
+			{#each results as result}
+				<article>
+					<header title={result.name}>
+						<a target="_blankl" href={`${variables.apiUrl}/file/${result.id}`}>{result.name}</a>
+					</header>
+					<p>
+						{result.summary}
+					</p>
+					<footer>
+						<a target="_blankl" href={`${variables.apiUrl}/file/${result.id}`}>Download</a>
+					</footer>
+				</article>
+			{/each}
+		</div>
+	{/if}
 </div>
 
-{#if results.length}
-	<div class="results">
-		{#each results as result}
-			<a href={`${variables.apiUrl}/file/${result.id}`}>{result.name}</a>
-		{/each}
-	</div>
-{/if}
-
 <style lang="scss">
+	.search-page {
+		padding: 1rem;
+		min-height: 80vh;
+		// display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
 	.results {
 		display: flex;
-		flex-direction: column;
-		margin-top: 1em;
-	}	
+		flex-wrap: wrap;
+		justify-content: center;
+
+		article {
+			width: 450px;
+
+			header {
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			p {
+				white-space: wrap;
+				height: 100px;
+			}
+		}
+	}
+
+	article.search-box {
+		width: 50%;
+		margin: 25px auto;
+
+		@media screen and (max-width: 1000px) {
+			width: 100%;
+		}
+	}
 </style>
