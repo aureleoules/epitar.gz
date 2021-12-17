@@ -46,7 +46,7 @@ Here is an example:
 ```
 
 #### README.md
-Your **must** provide a simple `README.md` that explains how to use this module.  
+You **must** provide a simple `README.md` that explains how to use this module.  
 An archive module **may** take environment variables as options so you may explain them here.
 
 #### Other files
@@ -54,6 +54,5 @@ You **may** add any other files in the module directory but try to keep it organ
 
 You **must** edit the `config.sample.yml` file to provide an example on how to use your archive module.
 
-## Author
 ## License
 [MIT](https://github.com/aureleoules/bitcandle/blob/master/LICENSE) - [Aurèle Oulès](https://www.aureleoules.com)
