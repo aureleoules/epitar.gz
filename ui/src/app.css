@@ -1,1 +1,6 @@
 @import "@picocss/pico/css/pico.css";
+
+#svelte {
+    position: relative;
+    min-height: 100vh;
+}

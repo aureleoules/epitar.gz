@@ -83,10 +83,6 @@
 <style lang="scss">
 	.search-page {
 		padding: 1rem;
-		min-height: 80vh;
-		// display: flex;
-		flex-direction: column;
-		align-items: center;
 	}
 
 	.results {

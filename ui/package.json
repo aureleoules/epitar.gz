@@ -36,6 +36,7 @@
     "@rollup/plugin-replace": "^3.0.0",
     "cookie": "^0.4.1",
     "dotenv": "^10.0.0",
+    "filesize": "^8.0.6",
     "node-sass": "^7.0.0"
   }
 }
