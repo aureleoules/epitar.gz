@@ -1,4 +1,4 @@
-import adapter from '@sveltejs/adapter-netlify';
+import adapter from '@sveltejs/adapter-node';
 import preprocess from 'svelte-preprocess';
 import replace from '@rollup/plugin-replace';
 import {config} from 'dotenv';
