@@ -2,30 +2,22 @@
 	import '../app.css';
 	import filesize from 'filesize';
 	import HeartIcon from '../assets/svg/heart.svg?raw';
+	import { onMount } from 'svelte';
 
+	import { variables } from '$lib/var';
 	export let stats;
-</script>
 
-<script context="module">
-	import {variables} from '$lib/var';
-
-	export async function load({fetch}) {
-		const stats = await fetch(`${variables.apiUrl}/stats`)
-		.then(res => res.json())
-		.then(d => {
-			return d;
-		}).catch(err => {
-			console.error(err);
-			return {};
-		});
-
-		return {
-			props: {
-				stats
-			}
-		};
-	}
-
+	onMount(async () => {
+		stats = await fetch(`${variables.apiUrl}/stats`)
+			.then((res) => res.json())
+			.then((d) => {
+				return d;
+			})
+			.catch((err) => {
+				console.error(err);
+				return {};
+			});
+	});
 </script>
 
 <nav>
@@ -37,16 +29,16 @@
 	</ul>
 	<ul>
 		{#if stats}
-		<li>
-			<small>
-				{stats?.total_files?.toLocaleString()} documents
-			</small>
-		</li>
-		<li>
-			<small>
-				{stats?.total_size && filesize(stats.total_size)}
-			</small>
-		</li>
+			<li>
+				<small>
+					{stats?.total_files?.toLocaleString()} documents
+				</small>
+			</li>
+			<li>
+				<small>
+					{stats?.total_size && filesize(stats.total_size)}
+				</small>
+			</li>
 		{/if}
 	</ul>
 </nav>
@@ -58,17 +50,17 @@
 <footer>
 	<div class="footer-content">
 		<small>
-			built with {@html HeartIcon} by <a target="_blank" href="https://github.com/aureleoules">@aureleoules</a>
+			built with {@html HeartIcon} by
+			<a target="_blank" href="https://github.com/aureleoules">@aureleoules</a>
 		</small>
 	</div>
 </footer>
 
 <style lang="scss">
-
 	nav {
 		padding: 0 1em;
 	}
-	
+
 	footer {
 		.footer-content {
 			position: absolute;

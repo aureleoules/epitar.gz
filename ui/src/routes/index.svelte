@@ -1,44 +1,24 @@
-<script context="module" lang="ts">
-	export const prerender = true;
-
-	import {variables} from '$lib/var';
-
-	export async function load({fetch}) {
-		const modules = await fetch(`${variables.apiUrl}/modules`)
-		.then(res => res.json())
-		.then(d => {
-			return d;
-		}).catch(e => {
-			console.error(e);
-			return [];
-		});
-
-		return {
-			props: {
-				modules
-			}
-		};
-	}
-</script>
-
 <script lang="ts">
+	import { variables } from '$lib/var';
 	import InfiniteScroll from 'svelte-infinite-scroll';
-	import Tag from '$lib/Tag.svelte';
 	import { onMount } from 'svelte';
 
-	export let modules;
+	let modules = [];
 	let page = 1;
 	let query = '';
 	let module = '';
 	let results = [];
 
-	onMount(() => {
-		// get url param
-		// query = new URLSearchParams(window.location.search).get('q');
-		// if (query) {
-		// 	console.log('query', query);
-		// 	search();
-		// }
+	onMount(async () => {
+		modules = await fetch(`${variables.apiUrl}/modules`)
+			.then((res) => res.json())
+			.then((d) => {
+				return d;
+			})
+			.catch((e) => {
+				console.error(e);
+				return [];
+			});
 	});
 
 	function search(concat: boolean = false) {
@@ -50,10 +30,8 @@
 				return [];
 			})
 			.then((res) => {
-				if(concat)
-					results = results.concat(res);
-				else
-					results = res;
+				if (concat) results = results.concat(res);
+				else results = res;
 				console.log(res);
 			})
 			.catch((err) => {
@@ -86,7 +64,7 @@
 				on:input={(e) => setParams(e.target.value, module)}
 			/>
 			<label for="module">Module</label>
-			<select on:input={e => setParams(query, e.target.value)} name="module">
+			<select on:input={(e) => setParams(query, e.target.value)} name="module">
 				<option value="">All</option>
 				{#each modules as module}
 					<option value={module.slug}>{module.name}</option>
@@ -118,9 +96,11 @@
 				hasMore={true}
 				window={true}
 				threshold={100}
-				on:loadMore={() => {page++; search(true);}}
+				on:loadMore={() => {
+					page++;
+					search(true);
+				}}
 			/>
-			
 		</div>
 	{/if}
 </div>
@@ -156,7 +136,6 @@
 					font-size: 16px;
 				}
 			}
-
 		}
 	}
 
