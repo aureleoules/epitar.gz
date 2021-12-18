@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -22,7 +23,7 @@ import (
 
 var searcher sonic.Searchable
 
-func init() {
+func handleInterrupt() {
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
@@ -34,6 +35,7 @@ func init() {
 }
 
 func Serve() {
+	handleInterrupt()
 	zap.S().Info("Starting server...")
 
 	e := echo.New()
@@ -51,14 +53,20 @@ func Serve() {
 
 	var lock sync.Mutex
 	e.GET("/search", func(c echo.Context) error {
+		const limit = 150
 		query := c.QueryParam("q")
 		if len(query) == 0 {
 			return c.JSON(http.StatusNotAcceptable, nil)
 		}
 
+		page, err := strconv.Atoi(c.QueryParam("page"))
+		if err != nil {
+			page = 1
+		}
+
 		// TODO: Create pool of searchers
 		lock.Lock()
-		resp, err := searcher.Query("files", "default", query, 50, 0, "")
+		resp, err := searcher.Query("files", "default", query, limit, (page-1)*limit, "")
 		lock.Unlock()
 		if err != nil {
 			c.NoContent(http.StatusInternalServerError)
@@ -85,7 +93,21 @@ func Serve() {
 			return err
 		}
 
-		return c.JSON(200, files)
+		var filtered []models.FileMeta
+		if c.QueryParam("module") == "" {
+			filtered = files
+		} else {
+			for _, f := range files {
+				for _, o := range f.Origins {
+					if o.Module == c.QueryParam("module") {
+						filtered = append(filtered, f)
+						break
+					}
+				}
+			}
+		}
+
+		return c.JSON(200, filtered)
 	})
 
 	e.GET("/file/:id", func(c echo.Context) error {

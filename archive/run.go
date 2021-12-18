@@ -1,7 +1,9 @@
 package archive
 
 import (
+	"bufio"
 	"context"
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -43,8 +45,15 @@ func (module *Module) Run() error {
 		return err
 	}
 
+	var env []string
+	for key, value := range module.Options {
+		str := fmt.Sprintf("%s=%s", key, value)
+		env = append(env, str)
+	}
+
 	cont, err := dockerClient.ContainerCreate(context.Background(), &container.Config{
 		Image: "epitar-module-" + module.Meta.Slug,
+		Env:   env,
 	}, &container.HostConfig{
 		Mounts: []mount.Mount{
 			{
@@ -63,6 +72,22 @@ func (module *Module) Run() error {
 	if err != nil {
 		color.Red("Error starting container: %s", err)
 		return err
+	}
+
+	// Print container output
+	out, err := dockerClient.ContainerLogs(context.Background(), cont.ID, types.ContainerLogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		Follow:     true,
+	})
+	if err != nil {
+		color.Red("Error getting container logs: %s", err)
+		return err
+	}
+	// Wait for build to finish
+	scanner := bufio.NewScanner(out)
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
 	}
 
 	// Set container ID

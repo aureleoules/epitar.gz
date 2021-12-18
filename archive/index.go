@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"unicode"
 
 	"code.sajari.com/docconv/client"
@@ -18,6 +19,7 @@ import (
 	"github.com/aureleoules/epitar/models"
 	"github.com/expectedsh/go-sonic/sonic"
 	"github.com/fatih/color"
+	"go.uber.org/zap"
 	"golang.org/x/text/runes"
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
@@ -55,31 +57,51 @@ func checkExtension(accept []string, path string) bool {
 	return false
 }
 
-func buildKey(keyType string, hash []byte) []byte {
-	return append([]byte(keyType), hash...)
+func isNewOrigin(origins []models.FileOrigin, name string) bool {
+	for _, o := range origins {
+		if o.Module == name {
+			return false
+		}
+	}
+	return true
 }
 
-func indexPath(path string) error {
+func (m *Module) indexPath(path string) error {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
 	}
 
+	originURL, err := ioutil.ReadFile(path + ".url")
+	if err != nil {
+		return err
+	}
+
+	url := strings.TrimSpace(string(originURL))
+
 	h := sha1.Sum(data)
 	key := hex.EncodeToString(h[:])
 
-	_, err = models.GetFileMeta(key)
+	fileMeta, err := models.GetFileMeta(key)
 	if err == nil {
-		color.Yellow("Skipped %s because it already exists", filepath.Base(path))
-		return nil
+		fmt.Println(fileMeta.Origins)
+		if isNewOrigin(fileMeta.Origins, m.Meta.Slug) {
+			zap.S().Debugf("Adding origin %s to file %s", m.Meta.Slug, key)
+			err = fileMeta.AddOrigin(m.Meta.Slug, url)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		} else {
+			color.Yellow("Skipped %s because it already exists", filepath.Base(path))
+			return nil
+		}
 	}
 
 	name := filepath.Base(path)
+	zap.S().Debugf("Pre processing %s", name)
 	keywords := preprocessText(name, data)
-	if keywords == "" {
-		color.Yellow("Skipped %s because it has no keywords", filepath.Base(path))
-		return nil
-	}
 
 	maxLength := len(keywords)
 	if maxLength > 100 {
@@ -97,11 +119,18 @@ func indexPath(path string) error {
 		return err
 	}
 
+	if err := meta.AddOrigin(m.Meta.Slug, url); err != nil {
+		return err
+	}
+
+	zap.S().Infof("Writing file... %s", name)
 	err = os.WriteFile(filepath.Join(config.Cfg.Index.Store, "files", key), data, 0644)
 	if err != nil {
 		return err
 	}
 
+	keywords = name + " " + keywords
+	zap.S().Infof("Pushing keyworks... %s", name)
 	err = ingester.Push("files", "default", "key:"+key, keywords, "")
 	if err != nil {
 		return err
@@ -137,7 +166,7 @@ func (m *Module) Index() error {
 
 	for _, f := range files {
 		fmt.Printf("\rIndexing %s (%d/%d)\n", f, i, l)
-		err := indexPath(f)
+		err := m.indexPath(f)
 		if err != nil {
 			return err
 		}
@@ -163,9 +192,11 @@ func IndexModules() error {
 	}
 
 	for _, m := range modules {
-		color.Magenta("Indexing module %s", m.Meta.Name)
-		if err := m.Index(); err != nil {
-			return err
+		if m.IndexOptions.Enable {
+			color.Magenta("Indexing module %s", m.Meta.Name)
+			if err := m.Index(); err != nil {
+				return err
+			}
 		}
 	}
 
