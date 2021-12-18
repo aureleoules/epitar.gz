@@ -1,0 +1,13 @@
+{
+    "name": "Debug Pro",
+    "slug": "debug-pro",
+    "url": "http://www.debug-pro.com/",
+    "description": "Various documents for SUP and SPE students.",
+    "logo": "",
+    "authors": [
+        {
+            "name": "Aurele Oules",
+            "email": "aurele@oules.com"
+        }
+    ]
+}

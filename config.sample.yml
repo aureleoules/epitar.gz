@@ -13,6 +13,11 @@ modules:
     index:
       enable: false
       files: [pdf]
+  - path: modules/debug-pro
+    enable: true
+    index:
+      enable: true
+      files: [pdf]
   - path: modules/epidocs-past-exams
     enable: true
     index:
