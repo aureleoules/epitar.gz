@@ -1,7 +1,9 @@
 version: "2.0"
 services:
   docconv:
-    image: docconv
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.docconv
     ports:
       - "8888:8888"
   sonic:
