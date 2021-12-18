@@ -11,3 +11,20 @@ services:
     volumes:
       - ./sonic.cfg:/etc/sonic.cfg
       - ./data/sonic:/sonic
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: --config /config.yml serve
+    ports:
+      - 1323:1323
+    links:
+      - docconv
+      - sonic
+    volumes:
+      - ./config.yml:/config.yml
+      - ./data:/epitar/data
+
+networks:
+  docconv:
+  sonic:

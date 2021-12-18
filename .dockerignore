@@ -1,3 +1,4 @@
-data
-modules
-
+data/
+**/node_modules
+.git/
+Dockerfile

@@ -1,6 +1,13 @@
 # epitar.gz
 Highly customizable archive and index framework for EPITA.
 
+## Get started
+* Create a new `config.yml` (see `config.sample.yml`) to configure the EPITA services you wish to archive by specifying the associated archive module.  
+* Configure your sonic instance in `sonic.cfg`.
+* Run the given `docker-compose.yml` file in order to start your sonic instance and a docconv container (word extractor for PDF files).
+* Run `./epitar start` to start archiving and indexing.
+
+
 ## How does it work
 
 ### Archive modules

@@ -1,15 +1,40 @@
-output: ./output
+output: ./data/raw
+
+index:
+  store: ./data/store
+  sonic:
+    host: sonic
+    port: 1491
+    password: password
 
 modules:
-  - name: akim
-    path: modules/akim
-    enabled: true
-  - name: intra
-    path: modules/intra
-    enabled: false
-    config:
-      login:
-      password:
-  - name: mastercorp
-    path: modules/mastercorp
-    enabled: true
+  - path: modules/akim
+    enable: true
+    index:
+      enable: false
+      files: [pdf]
+  - path: modules/epidocs-past-exams
+    enable: true
+    index:
+      enable: false
+      files: [pdf]
+  - path: modules/intra
+    enable: false
+    options:
+      LOGIN: your.login
+      PASSWORD: your_cri_password
+    index:
+      enable: false
+      files: [pdf]
+  - path: modules/lse.epita.fr
+    enable: false
+    index:
+      enable: true
+      files: [pdf]
+  - path: modules/mastercorp.epita.eu
+    enable: false
+    index:
+      enable: true
+      files: [pdf]
+  - path: modules/algo.infoprepa.epita.fr
+    enable: false

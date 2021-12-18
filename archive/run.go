@@ -15,6 +15,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/fatih/color"
+	"go.uber.org/zap"
 )
 
 func (module *Module) Run() error {
@@ -40,6 +41,7 @@ func (module *Module) Run() error {
 	}
 
 	source := path.Join(output, module.Meta.Slug)
+	zap.S().Infof("Source: %s", source)
 	err = os.MkdirAll(source, 0755)
 	if err != nil {
 		return err
