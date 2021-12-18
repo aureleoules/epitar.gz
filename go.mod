@@ -17,6 +17,7 @@ require (
 	github.com/moby/sys/mount v0.3.0 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.2 // indirect
+	github.com/silenceper/pool v1.0.0 // indirect
 	github.com/urfave/cli/v2 v2.3.0
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect

@@ -8,7 +8,6 @@ import (
 	"path"
 	"strconv"
 	"strings"
-	"sync"
 	"syscall"
 
 	"github.com/aureleoules/epitar/config"
@@ -20,8 +19,6 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
 )
-
-var searcher sonic.Searchable
 
 func handleInterrupt() {
 	c := make(chan os.Signal)
@@ -51,7 +48,6 @@ func Serve() {
 		return c.String(http.StatusOK, "salu")
 	})
 
-	var lock sync.Mutex
 	e.GET("/search", func(c echo.Context) error {
 		const limit = 150
 		query := c.QueryParam("q")
@@ -64,14 +60,19 @@ func Serve() {
 			page = 1
 		}
 
-		// TODO: Create pool of searchers
-		lock.Lock()
-		resp, err := searcher.Query("files", "default", query, limit, (page-1)*limit, "")
-		lock.Unlock()
+		searcher, err := sonicPool.Get()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, err)
+			return err
+		}
+
+		resp, err := searcher.(sonic.Searchable).Query("files", "default", query, limit, (page-1)*limit, "")
 		if err != nil {
 			c.NoContent(http.StatusInternalServerError)
 			return err
 		}
+
+		sonicPool.Put(searcher)
 
 		var ids []string
 		for _, r := range resp {
