@@ -8,6 +8,16 @@ index:
     password: password
 
 modules:
+  - path: modules/epita-2025-annales
+    enable: true
+    index:
+      enable: true
+      files: [pdf]
+    options:
+      SSH_KEY: |
+        -----BEGIN OPENSSH PRIVATE KEY-----
+        XXX
+        -----END OPENSSH PRIVATE KEY-----
   - path: modules/akim
     enable: true
     index:
