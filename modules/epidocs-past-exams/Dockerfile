@@ -1,6 +1,7 @@
 FROM alpine:latest
-RUN apk add git
+RUN apk add git bash
 
 WORKDIR /output
 
-ENTRYPOINT ["git", "clone", "https://github.com/Epidocs/Past-Exams.git"]
+COPY entrypoint.sh /entrypoint.sh
+ENTRYPOINT /entrypoint.sh

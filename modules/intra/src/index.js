@@ -1,7 +1,8 @@
 const puppeteer = require('puppeteer');
+const fs = require('fs');
 
 const URL = 'https://intra.assistants.epita.fr/';
-const DOWLOAD_PATH = '/data';
+const DOWLOAD_PATH = '/output';
 
 function delay(time) {
     return new Promise(function (resolve) {
@@ -20,6 +21,16 @@ async function scanLinks(page, linkType) {
         }
         return r;
     }, linkType);
+}
+
+function storeFileURL(url, path) {
+    console.log('Downloading file...', url, path);
+    fs.writeFile(DOWLOAD_PATH + '/' + path + '.url', url, function (err) {
+        if (err) {
+            return console.log(err);
+        }
+        console.log("The file was saved!");
+    });
 }
 
 async function archive() {
@@ -60,7 +71,7 @@ async function archive() {
     console.log('Fetched activities.');
 
     console.log('Found ' + links.length + ' activities.');
-
+    await page.exposeFunction('storeFileURL', storeFileURL);
     for (let i = 0; i < links.length; i++) {
         await page.goto(links[i]);
         await delay(3000);
@@ -87,6 +98,8 @@ async function archive() {
                     if (links[i].firstChild.icon.includes('file')) {
                         console.log('Downloading file...');
                         links[i].click();
+                        
+                        await window.storeFileURL(window.location.href, links[i].parentNode.parentNode.nextSibling.textContent);
                         await delay(1000);
                     }
                 }

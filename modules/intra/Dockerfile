@@ -23,8 +23,7 @@ COPY src/* /app/
 ENV DISPLAY :99
 
 RUN mkdir userData
+COPY entrypoint.sh /entrypoint.sh
 
 # Start script on Xvfb
-CMD Xvfb :99 -screen 0 1920x1080x16 & node index.js
-
-
+ENTRYPOINT /entrypoint.sh

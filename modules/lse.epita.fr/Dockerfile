@@ -1,6 +1,7 @@
 FROM mwendler/wget
+RUN apk update && apk add bash
 WORKDIR /output
 
-ENV url "https://www.lse.epita.fr/"
+COPY entrypoint.sh /entrypoint.sh
 
-ENTRYPOINT wget -nc --no-check-certificate -r -np --no-http-keep-alive --content-disposition -A.pdf ${url}
+ENTRYPOINT /entrypoint.sh

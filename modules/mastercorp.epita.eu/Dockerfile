@@ -1,6 +1,7 @@
 FROM mwendler/wget
+run apk update && apk add bash
 WORKDIR /output
 
-ENV url https://mastercorp.epita.eu/
+COPY entrypoint.sh /entrypoint.sh
 
-ENTRYPOINT wget -nc --no-check-certificate -r -np -R "index.html/*" ${url}
+ENTRYPOINT /entrypoint.sh
