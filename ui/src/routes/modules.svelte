@@ -11,7 +11,10 @@
 		.then(res => res.json())
 		.then(d => {
 			return d;
-		});
+		}).catch(e => {
+            console.error(e);
+            return [];
+        });
 
 		return {
 			props: {

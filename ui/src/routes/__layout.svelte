@@ -14,6 +14,9 @@
 		.then(res => res.json())
 		.then(d => {
 			return d;
+		}).catch(err => {
+			console.error(err);
+			return {};
 		});
 
 		return {
@@ -36,12 +39,12 @@
 		{#if stats}
 		<li>
 			<small>
-				{stats.total_files.toLocaleString()} documents
+				{stats?.total_files?.toLocaleString()} documents
 			</small>
 		</li>
 		<li>
 			<small>
-				{filesize(stats.total_size)}
+				{stats?.total_size && filesize(stats.total_size)}
 			</small>
 		</li>
 		{/if}
