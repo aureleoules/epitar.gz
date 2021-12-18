@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"path"
 	"strconv"
 	"strings"
 	"syscall"
@@ -111,17 +110,17 @@ func Serve() {
 		return c.JSON(200, filtered)
 	})
 
-	e.GET("/file/:id", func(c echo.Context) error {
-		id := c.Param("id")
-		meta, err := models.GetFileMeta(id)
-		if err != nil {
-			c.NoContent(http.StatusInternalServerError)
-			return err
-		}
+	// e.GET("/file/:id", func(c echo.Context) error {
+	// 	id := c.Param("id")
+	// 	meta, err := models.GetFileMeta(id)
+	// 	if err != nil {
+	// 		c.NoContent(http.StatusInternalServerError)
+	// 		return err
+	// 	}
 
-		c.Response().Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=%s", meta.Name))
-		return c.File(path.Join(config.Cfg.Index.Store, "files", id))
-	})
+	// 	c.Response().Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=%s", meta.Name))
+	// 	return c.File(path.Join(config.Cfg.Index.Store, "files", id))
+	// })
 
 	e.GET("/modules", func(c echo.Context) error {
 		var modules []config.ModuleMeta
