@@ -1,6 +1,8 @@
 # epitar.gz
 Highly customizable archive and index framework for EPITA.
 
+![](./docs/screenshot.png)
+
 ## Get started
 * Create a new `config.yml` (see `config.sample.yml`) to configure the EPITA services you wish to archive by specifying the associated archive module.  
 * Configure your sonic instance in `sonic.cfg`.
