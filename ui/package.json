@@ -37,6 +37,7 @@
     "cookie": "^0.4.1",
     "dotenv": "^10.0.0",
     "filesize": "^8.0.6",
-    "node-sass": "^7.0.0"
+    "node-sass": "^7.0.0",
+    "svelte-infinite-scroll": "^2.0.0"
   }
 }
