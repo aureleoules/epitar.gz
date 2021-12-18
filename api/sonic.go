@@ -1,6 +1,8 @@
 package api
 
 import (
+	"time"
+
 	"github.com/aureleoules/epitar/config"
 	"github.com/expectedsh/go-sonic/sonic"
 )
@@ -11,4 +13,14 @@ func initSonic() {
 	if err != nil {
 		panic(err)
 	}
+
+	go func() {
+		for {
+			err := searcher.Ping()
+			if err != nil {
+				panic(err)
+			}
+			<-time.After(time.Second * 10)
+		}
+	}()
 }
