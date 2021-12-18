@@ -9,7 +9,6 @@ Highly customizable archive and index framework for EPITA.
 * Run the given `docker-compose.yml` file in order to start your sonic instance and a docconv container (word extractor for PDF files).
 * Run `./epitar start` to start archiving and indexing.
 
-
 ## How does it work
 
 ### Archive modules

@@ -186,7 +186,7 @@ func IndexModules() error {
 	db.Init()
 	defer db.Close()
 
-	ingester, err = sonic.NewIngester("localhost", 1491, "password")
+	ingester, err = sonic.NewIngester(config.Cfg.Index.Sonic.Host, config.Cfg.Index.Sonic.Port, config.Cfg.Index.Sonic.Password)
 	if err != nil {
 		panic(err)
 	}
