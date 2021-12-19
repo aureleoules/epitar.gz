@@ -8,8 +8,9 @@ wget \
     -r \
     -np \
     --no-http-keep-alive \
-    --content-disposition -A.pdf \
-    "$url/~akim"
+    -e robots=off \
+    --content-disposition \
+    "$url"
 
 ls /output
 cd /output/www.lrde.epita.fr && \
