@@ -1,0 +1,13 @@
+{
+    "name": "HyperAnnales",
+    "slug": "hyperannales",
+    "url": "https://annales.hyperion.tf/",
+    "description": "Permet aux Epithéens d'accéder aux TP et à leurs corrections. Ainsi qu'aux différentes épreuves (QCM, Midterm, Partiels).",
+    "logo": "https://static.hyperion.tf/hyperion/img/favicon.ico",
+    "authors": [
+        {
+            "name": "Aurele Oules",
+            "email": "aurele@oules.com"
+        }
+    ]
+}
