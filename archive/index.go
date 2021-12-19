@@ -33,14 +33,18 @@ var (
 	ingester      sonic.Ingestable
 )
 
+func normalize(txt string) string {
+	result, _, _ := transform.String(transformChain, txt)
+	return preprocRgx.ReplaceAllString(result, " ")
+}
+
 func preprocessText(filename string, data []byte) string {
 	res, err := docconvClient.Convert(bytes.NewReader(data), filename)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	result, _, _ := transform.String(transformChain, res.Body)
-	return preprocRgx.ReplaceAllString(result, " ")
+	return normalize(res.Body)
 }
 
 func checkExtension(accept []string, path string) bool {
@@ -129,7 +133,7 @@ func (m *Module) indexPath(path string) error {
 		return err
 	}
 
-	keywords = name + " " + keywords
+	keywords = normalize(name) + " " + keywords
 	zap.S().Infof("Pushing keyworks... %s", name)
 	err = ingester.Push("files", "default", "key:"+key, keywords, "")
 	if err != nil {
