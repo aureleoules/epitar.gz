@@ -10,6 +10,8 @@ wget \
     --no-http-keep-alive \
     -e robots=off \
     --content-disposition \
+    --reject="index.html*" \
+    --reject="index.php*" \
     "$url"
 
 ls /output
