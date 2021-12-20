@@ -18,7 +18,7 @@
 </script>
 
 <div class="container">
-	<h1>Indexed modules</h1>
+	<h1>Indexed sources</h1>
 	<table>
 		<thead>
 			<tr>

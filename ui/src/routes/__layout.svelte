@@ -24,7 +24,7 @@
 	<ul>
 		<li><strong>epitar.gz</strong></li>
 		<li><a href="/">Search</a></li>
-		<li><a href="/modules">Modules</a></li>
+		<li><a href="/modules">Sources</a></li>
 		<li><a href="/about">About</a></li>
 	</ul>
 	<ul>

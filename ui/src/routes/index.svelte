@@ -63,7 +63,7 @@
 				required
 				on:input={(e) => setParams(e.target.value, module)}
 			/>
-			<label for="module">Module</label>
+			<label for="module">Source</label>
 			<select on:input={(e) => setParams(query, e.target.value)} name="module">
 				<option value="">All</option>
 				{#each modules as module}
