@@ -1,0 +1,13 @@
+{
+    "name": "Moodle",
+    "slug": "moodle",
+    "url": "https://moodle.cri.epita.fr/",
+    "description": "Plateforme d'apprentissage d'EPITA.",
+    "logo": "https://moodle.cri.epita.fr/pluginfile.php/1/core_admin/logocompact/300x300/1639490974/logo-epita.png",
+    "authors": [
+        {
+            "name": "Aurele Oules",
+            "email": "aurele@oules.com"
+        }
+    ]
+}
