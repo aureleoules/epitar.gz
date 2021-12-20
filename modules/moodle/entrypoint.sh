@@ -69,3 +69,10 @@ wget \
     --verbose \
     --reject-regex logout \
     "https://moodle.cri.epita.fr"
+
+
+cd moodle.cri.epita.fr && \
+    find * \
+    -type f \
+    -name "*.pdf" \
+    -exec /bin/bash -c 'f=$(printf "%s" "$1"); echo "https://moodle.cri.epita.fr/$f" > "/output/moodle.cri.epita.fr/$f.url"' X {} \;
