@@ -14,6 +14,9 @@ wget \
     --reject="index.php*" \
     "$url"
 
+find -name 'index.php*' -delete
+find -name 'index.html*' -delete
+
 ls /output
 cd /output/www.lrde.epita.fr && \
     find * \
