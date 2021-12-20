@@ -19,9 +19,21 @@
 				console.error(e);
 				return [];
 			});
+
+		// Retrieve url params
+		const urlParams = new URLSearchParams(window.location.search);
+		query = urlParams.get('q') || "";
+		module = urlParams.get('module') || "";
+		
+		// If query is set, search
+		if (query) {
+			search();
+		}
 	});
 
 	function search(concat: boolean = false) {
+		history.pushState(null, null, `?q=${query}&module=${module}`);
+
 		fetch(`${variables.apiUrl}/search?q=${query}&module=${module}&page=${page}`)
 			.then((res) => {
 				if (res.ok) {
@@ -45,6 +57,10 @@
 		page = 1;
 		search();
 	}
+
+	function onSubmit(e: Event) {
+		e.preventDefault();
+	}
 </script>
 
 <svelte:head>
@@ -54,17 +70,18 @@
 <div class="search-page">
 	<article class="search-box">
 		<header>epitar.gz search index</header>
-		<form>
+		<form on:submit={onSubmit}>
 			<label for="q">Query</label>
 			<input
 				type="text"
 				name="q"
 				placeholder="thl, assembly, mathematics..."
 				required
+				value={query}
 				on:input={(e) => setParams(e.target.value, module)}
 			/>
 			<label for="module">Source</label>
-			<select on:input={(e) => setParams(query, e.target.value)} name="module">
+			<select value={module} on:input={(e) => setParams(query, e.target.value)} name="module">
 				<option value="">All</option>
 				{#each modules as module}
 					<option value={module.slug}>{module.name}</option>
