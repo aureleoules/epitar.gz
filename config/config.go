@@ -16,6 +16,7 @@ type ModuleMeta struct {
 
 type Module struct {
 	Path         string            `yaml:"path"`
+	Hide         bool              `yaml:"hide"`
 	Options      map[string]string `yaml:"options"`
 	Enable       bool              `yaml:"enable"`
 	IndexOptions struct {
@@ -35,7 +36,13 @@ type IndexConfig struct {
 }
 
 type Config struct {
-	Output  string      `yaml:"output"`
-	Index   IndexConfig `yaml:"index"`
-	Modules []Module    `yaml:"modules"`
+	Output string      `yaml:"output"`
+	Index  IndexConfig `yaml:"index"`
+	News   struct {
+		Enable bool   `yaml:"enable"`
+		Module string `yaml:"module"`
+		Host   string `yaml:"host"`
+		Port   int    `yaml:"port"`
+	} `yaml:"news"`
+	Modules []Module `yaml:"modules"`
 }

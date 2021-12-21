@@ -1,65 +1,25 @@
 package archive
 
 import (
-	"bytes"
-	"crypto/sha1"
-	"encoding/hex"
+	"bufio"
 	"fmt"
 	"io/ioutil"
-	"log"
+	"mime"
+	"net/http"
+	"net/textproto"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
-	"unicode"
 
 	"code.sajari.com/docconv/client"
+	"github.com/araddon/dateparse"
 	"github.com/aureleoules/epitar/config"
 	"github.com/aureleoules/epitar/db"
 	"github.com/aureleoules/epitar/models"
 	"github.com/expectedsh/go-sonic/sonic"
 	"github.com/fatih/color"
 	"go.uber.org/zap"
-	"golang.org/x/text/runes"
-	"golang.org/x/text/transform"
-	"golang.org/x/text/unicode/norm"
 )
-
-var (
-	transformChain = transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
-	preprocRgx     = regexp.MustCompile(`[^\w]`)
-
-	docconvClient *client.Client
-	ingester      sonic.Ingestable
-)
-
-func normalize(txt string) string {
-	result, _, _ := transform.String(transformChain, txt)
-	return preprocRgx.ReplaceAllString(result, " ")
-}
-
-func preprocessText(filename string, data []byte) string {
-	res, err := docconvClient.Convert(bytes.NewReader(data), filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return normalize(res.Body)
-}
-
-func checkExtension(accept []string, path string) bool {
-	ext := filepath.Ext(path)
-	if ext == "" {
-		return false
-	}
-	ext = ext[1:]
-	for _, a := range accept {
-		if a == ext {
-			return true
-		}
-	}
-	return false
-}
 
 func isNewOrigin(origins []models.FileOrigin, name string) bool {
 	for _, o := range origins {
@@ -70,25 +30,23 @@ func isNewOrigin(origins []models.FileOrigin, name string) bool {
 	return true
 }
 
-func (m *Module) indexPath(path string) error {
+func (m *Module) indexDocument(path string) error {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
 	}
 
-	originURL, err := ioutil.ReadFile(path + ".url")
+	key := getFileID(data)
+
+	urlBytes, err := ioutil.ReadFile(path + ".url")
 	if err != nil {
 		return err
 	}
 
-	url := strings.TrimSpace(string(originURL))
-
-	h := sha1.Sum(data)
-	key := hex.EncodeToString(h[:])
+	url := strings.TrimSpace(string(urlBytes))
 
 	fileMeta, err := models.GetFileMeta(key)
 	if err == nil {
-		fmt.Println(fileMeta.Origins)
 		if isNewOrigin(fileMeta.Origins, m.Meta.Slug) {
 			zap.S().Debugf("Adding origin %s to file %s", m.Meta.Slug, key)
 			err = fileMeta.AddOrigin(m.Meta.Slug, url)
@@ -105,7 +63,7 @@ func (m *Module) indexPath(path string) error {
 
 	name := filepath.Base(path)
 	zap.S().Debugf("Pre processing %s", name)
-	keywords := preprocessText(name, data)
+	keywords := preprocessDocument(name, data)
 
 	maxLength := len(keywords)
 	if maxLength > 100 {
@@ -113,7 +71,7 @@ func (m *Module) indexPath(path string) error {
 	}
 
 	meta := models.FileMeta{
-		ID:      hex.EncodeToString(h[:]),
+		ID:      key,
 		Name:    name,
 		Size:    int64(len(data)),
 		Summary: keywords[:maxLength],
@@ -134,43 +92,118 @@ func (m *Module) indexPath(path string) error {
 	}
 
 	keywords = normalize(name) + " " + keywords
-	zap.S().Infof("Pushing keyworks... %s", name)
-	err = ingester.Push("files", "default", "key:"+key, keywords, "")
+	zap.S().Infof("Pushing keywords... %s", name)
+	err = ingester.Push("files", "all", "key:"+key, keywords, "")
 	if err != nil {
 		return err
+	}
+
+	err = ingester.Push("files", m.Meta.Slug, "key:"+key, keywords, "")
+	return err
+}
+
+func (m *Module) indexNews(path string) error {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	key := getFileID(data)
+
+	_, err = models.GetNews(key)
+	if err == nil {
+		color.Yellow("Skipped %s because it already exists", filepath.Base(path))
+		return nil
+	}
+
+	println(key)
+
+	reader := bufio.NewReader(strings.NewReader(string(data) + "\r\n"))
+	tp := textproto.NewReader(reader)
+
+	header, err := tp.ReadMIMEHeader()
+	if err != nil {
+		return err
+	}
+
+	// http.Header and textproto.MIMEHeader are both just a map[string][]string
+	httpHeader := http.Header(header)
+
+	date, err := dateparse.ParseAny(httpHeader["Date"][0])
+	if err != nil {
+		return err
+	}
+
+	content := preprocessNews(string(data))
+	summary := content
+	if len(content) > 100 {
+		summary = content[:100]
+	}
+
+	dec := new(mime.WordDecoder)
+	subject, err := dec.DecodeHeader(httpHeader.Get("Subject"))
+	if err != nil {
+		return err
+	}
+
+	news := models.News{
+		ID:         key,
+		Subject:    subject,
+		From:       httpHeader["From"][0],
+		Date:       date,
+		Newsgroups: strings.Join(httpHeader["Newsgroups"], ","),
+		MessageID:  httpHeader["Message-Id"][0],
+		Size:       len(data),
+		Summary:    summary,
+	}
+
+	zap.S().Infof("Writing file... %s", filepath.Base(path))
+	if err := news.Save(); err != nil {
+		return err
+	}
+
+	content = news.ID + " " + content
+	zap.S().Infof("Pushing keywords... %s", filepath.Base(path))
+	err = ingester.Push("news", "all", "key:"+key, content, "")
+	if err != nil {
+		return err
+	}
+
+	for _, ng := range httpHeader["Newsgroups"] {
+		err = ingester.Push("news", ng, "key:"+key, content, "")
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func listIndexableFiles(rootDir string, accept []string) []string {
-	var files []string
-	filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() {
-			return nil
-		}
+func (m *Module) indexFile(path string) error {
+	fmt.Println("|" + getExtension(path) + "|")
+	switch getExtension(path) {
+	case "news":
+		return m.indexNews(path)
 
-		if !checkExtension(accept, path) {
-			return nil
-		}
+	case "pdf", "docx", "doc", "pptx", "ppt", "odt", "odp":
+		return m.indexDocument(path)
+	}
 
-		files = append(files, path)
-		return nil
-	})
+	zap.S().Panicf("Unsupported file type: %s\n", path)
 
-	return files
+	return nil
 }
 
 func (m *Module) Index() error {
 	p := filepath.Join(config.Cfg.Output, m.Meta.Slug)
 	files := listIndexableFiles(p, m.IndexOptions.Files)
 
-	l := len(files)
+	total := len(files)
 	i := 0
 
 	for _, f := range files {
-		fmt.Printf("\rIndexing %s (%d/%d)\n", f, i, l)
-		err := m.indexPath(f)
+		fmt.Printf("\rIndexing %s (%d/%d)\n", f, i, total)
+		err := m.indexFile(f)
 		if err != nil {
 			return err
 		}

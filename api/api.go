@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/aureleoules/epitar/config"
 	"github.com/aureleoules/epitar/db"
@@ -47,7 +48,7 @@ func Serve() {
 		return c.String(http.StatusOK, "salu")
 	})
 
-	e.GET("/search", func(c echo.Context) error {
+	e.GET("/documents/search", func(c echo.Context) error {
 		const limit = 150
 		query := c.QueryParam("q")
 		if len(query) == 0 {
@@ -65,7 +66,11 @@ func Serve() {
 			return err
 		}
 
-		resp, err := searcher.(sonic.Searchable).Query("files", "default", query, limit, (page-1)*limit, "")
+		module := strings.ToLower(c.QueryParam("module"))
+		if module == "" {
+			module = "all"
+		}
+		resp, err := searcher.(sonic.Searchable).Query("files", module, query, limit, (page-1)*limit, "")
 		if err != nil {
 			c.NoContent(http.StatusInternalServerError)
 			return err
@@ -93,21 +98,68 @@ func Serve() {
 			return err
 		}
 
-		var filtered []models.FileMeta
-		if c.QueryParam("module") == "" {
-			filtered = files
-		} else {
-			for _, f := range files {
-				for _, o := range f.Origins {
-					if o.Module == c.QueryParam("module") {
-						filtered = append(filtered, f)
-						break
-					}
-				}
-			}
+		return c.JSON(200, files)
+	})
+
+	e.GET("/news/search", func(c echo.Context) error {
+		const limit = 150
+		query := c.QueryParam("q")
+		if len(query) == 0 {
+			return c.JSON(http.StatusNotAcceptable, nil)
 		}
 
-		return c.JSON(200, filtered)
+		page, err := strconv.Atoi(c.QueryParam("page"))
+		if err != nil {
+			page = 1
+		}
+
+		searcher, err := sonicPool.Get()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, err)
+			return err
+		}
+
+		bucket := strings.ToLower(c.QueryParam("newsgroup"))
+		if bucket == "" {
+			bucket = "all"
+		}
+		resp, err := searcher.(sonic.Searchable).Query("news", bucket, query, limit, (page-1)*limit, "")
+		if err != nil {
+			c.NoContent(http.StatusInternalServerError)
+			return err
+		}
+
+		sonicPool.Put(searcher)
+
+		var ids []string
+		for _, r := range resp {
+			keyStrSplit := strings.Split(r, ":")
+			if len(keyStrSplit) != 2 {
+				continue
+			}
+			keyStr := keyStrSplit[1]
+			ids = append(ids, keyStr)
+		}
+
+		if len(ids) == 0 {
+			return c.NoContent(http.StatusNotFound)
+		}
+
+		news, err := models.GetNewsList(ids)
+		if err != nil {
+			c.NoContent(http.StatusInternalServerError)
+			return err
+		}
+
+		return c.JSON(200, news)
+	})
+
+	groups, err := models.GetUniqueNewsgroups()
+	if err != nil {
+		zap.S().Fatal("Failed to get newsgroups", zap.Error(err))
+	}
+	e.GET("/newsgroups", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, groups)
 	})
 
 	// e.GET("/file/:id", func(c echo.Context) error {
@@ -126,7 +178,7 @@ func Serve() {
 		var modules []config.ModuleMeta
 
 		for _, m := range config.Cfg.Modules {
-			if m.Enable {
+			if m.Enable && !m.Hide {
 				modules = append(modules, m.Meta)
 			}
 		}
@@ -134,14 +186,18 @@ func Serve() {
 		return c.JSON(http.StatusOK, modules)
 	})
 
-	e.GET("/stats", func(c echo.Context) error {
-		// TODO: CACHE
-		stats, err := models.GetStats()
-		if err != nil {
-			c.NoContent(http.StatusInternalServerError)
-			return err
+	var stats models.Stats
+	go func() {
+		for {
+			stats, err = models.GetStats()
+			if err != nil {
+				zap.S().Error("Failed to get stats", zap.Error(err))
+			}
+			time.Sleep(time.Minute)
 		}
+	}()
 
+	e.GET("/stats", func(c echo.Context) error {
 		return c.JSON(200, stats)
 	})
 

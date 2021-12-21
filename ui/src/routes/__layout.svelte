@@ -23,15 +23,20 @@
 <nav>
 	<ul>
 		<li><strong>epitar.gz</strong></li>
-		<li><a href="/">Search</a></li>
-		<li><a href="/modules">Sources</a></li>
-		<li><a href="/about">About</a></li>
+		<li><a href="/">Documents</a></li>
+		<li><a href="/news">News</a></li>
 	</ul>
 	<ul>
+		<li><a href="/modules">Sources</a></li>
 		{#if stats}
 			<li>
 				<small>
 					{stats?.total_files?.toLocaleString()} documents
+				</small>
+			</li>
+			<li>
+				<small>
+					{stats?.total_news?.toLocaleString()} news
 				</small>
 			</li>
 			<li>

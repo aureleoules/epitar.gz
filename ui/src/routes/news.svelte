@@ -3,14 +3,14 @@
 	import InfiniteScroll from 'svelte-infinite-scroll';
 	import { onMount } from 'svelte';
 
-	let modules = [];
+	let newsgroups = [];
 	let page = 1;
 	let query = '';
-	let module = '';
+	let newsgroup = '';
 	let results = [];
 
 	onMount(async () => {
-		modules = await fetch(`${variables.apiUrl}/modules`)
+		newsgroups = await fetch(`${variables.apiUrl}/newsgroups`)
 			.then((res) => res.json())
 			.then((d) => {
 				return d;
@@ -23,7 +23,7 @@
 		// Retrieve url params
 		const urlParams = new URLSearchParams(window.location.search);
 		query = urlParams.get('q') || "";
-		module = urlParams.get('module') || "";
+		newsgroup = urlParams.get('newsgroup') || "";
 		
 		// If query is set, search
 		if (query) {
@@ -32,9 +32,9 @@
 	});
 
 	function search(concat: boolean = false) {
-		history.pushState(null, null, `?q=${query}&module=${module}`);
+		history.pushState(null, null, `/news?q=${query}&newsgroup=${newsgroup}`);
 
-		fetch(`${variables.apiUrl}/documents/search?q=${query}&module=${module}&page=${page}`)
+		fetch(`${variables.apiUrl}/news/search?q=${query}&newsgroup=${newsgroup}&page=${page}`)
 			.then((res) => {
 				if (res.ok) {
 					return res.json();
@@ -53,7 +53,7 @@
 
 	function setParams(q: string, m: string) {
 		query = q;
-		module = m;
+		newsgroup = m;
 		page = 1;
 		search();
 	}
@@ -69,22 +69,22 @@
 
 <div class="search-page">
 	<article class="search-box">
-		<header>Search for documents</header>
+		<header>Search for news</header>
 		<form on:submit={onSubmit}>
 			<label for="q">Query</label>
 			<input
 				type="text"
 				name="q"
-				placeholder="thl, assembly, mathematics..."
+				placeholder="piscine, traces evalexpr, 42sh..."
 				required
 				value={query}
-				on:input={(e) => setParams(e.target.value, module)}
+				on:input={(e) => setParams(e.target.value, newsgroup)}
 			/>
-			<label for="module">Source</label>
-			<select value={module} on:input={(e) => setParams(query, e.target.value)} name="module">
+			<label for="newsgroup">Newsgroup</label>
+			<select value={newsgroup} on:input={(e) => setParams(query, e.target.value)} name="newsgroup">
 				<option value="">All</option>
-				{#each modules as module}
-					<option value={module.slug}>{module.name}</option>
+				{#each newsgroups as newsgroup}
+					<option value={newsgroup}>{newsgroup}</option>
 				{/each}
 			</select>
 			<button type="submit">Search</button>
@@ -95,15 +95,15 @@
 		<div class="results grid">
 			{#each results as result}
 				<article>
-					<header title={result.name}>
-						<a target="_blank" href={result.origins[0].original_url}>{result.name}</a>
+					<header title={result.subject}>
+						<a target="_blank" href={`https://news.infinity.study/?news=${result.message_id}`}>{result.subject}</a>
 					</header>
 					<p>
 						{result.summary}
 					</p>
 					<footer>
-						{#each result.origins as origin}
-							<a role="button" target="_blank" href={origin.original_url}>{origin.module}</a>
+						{#each result.newsgroups.split(",") as g}
+							<a role="button" target="_blank" href={`https://news.infinity.study/?news=${result.message_id}`}>{g}</a>
 						{/each}
 					</footer>
 				</article>
@@ -150,7 +150,7 @@
 				a {
 					margin-right: 14px;
 					padding: 8px;
-					font-size: 16px;
+					font-size: 13px;
 				}
 			}
 		}

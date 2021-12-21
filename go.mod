@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	code.sajari.com/docconv v1.2.0
+	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/briandowns/spinner v1.16.0
 	github.com/brpaz/echozap v1.1.2
 	github.com/containerd/containerd v1.5.8 // indirect
@@ -17,7 +18,7 @@ require (
 	github.com/moby/sys/mount v0.3.0 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.2 // indirect
-	github.com/silenceper/pool v1.0.0 // indirect
+	github.com/silenceper/pool v1.0.0
 	github.com/urfave/cli/v2 v2.3.0
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
