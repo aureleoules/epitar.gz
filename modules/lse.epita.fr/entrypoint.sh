@@ -8,4 +8,9 @@ cd /output/www.lse.epita.fr && \
     find * \
     -type f \
     -name "*.pdf" \
+    -o -name "*.doc" \
+    -o -name "*.docx" \
+    -o -name "*.ppt" \
+    -o -name "*.pptx" \
+    -o -name "*.odt" \
     -exec /bin/bash -c 'f=$(printf "%s" "$1"); echo "https://www.lse.epita.fr/$f" > "/output/www.lse.epita.fr/$f.url"' X {} \;

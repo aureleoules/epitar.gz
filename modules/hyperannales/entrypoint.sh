@@ -58,4 +58,9 @@ done
 find * \
     -type f \
     -name "*.pdf" \
+    -o -name "*.doc" \
+    -o -name "*.docx" \
+    -o -name "*.ppt" \
+    -o -name "*.pptx" \
+    -o -name "*.odt" \
     -exec /bin/bash -c 'f=$(printf "%s" "$1"); d=$(dirname "$f"); echo "https://annales.hyperion.tf/$d" > "/output/annales.hyperion.tf/$f.url"' X {} \;

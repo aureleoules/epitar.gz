@@ -16,4 +16,9 @@ cd /output/www.debug-pro.com && \
     find * \
     -type f \
     -name "*.pdf" \
+    -o -name "*.doc" \
+    -o -name "*.docx" \
+    -o -name "*.ppt" \
+    -o -name "*.pptx" \
+    -o -name "*.odt" \
     -exec /bin/bash -c 'f=$(printf "%s" "$1"); echo "http://www.debug-pro.com/$f" > "/output/www.debug-pro.com/$f.url"' X {} \;

@@ -12,4 +12,9 @@ cd /output/epita-2025-annales && \
     find * \
     -type f \
     -name "*.pdf" \
+    -o -name "*.doc" \
+    -o -name "*.docx" \
+    -o -name "*.ppt" \
+    -o -name "*.pptx" \
+    -o -name "*.odt" \
     -exec /bin/bash -c 'f=$(printf "%s" "$1"); echo "https://gitlab.cri.epita.fr/danae.danycan/epita-2025-annales/-/raw/master/$f?inline=true" > "/output/epita-2025-annales/$f.url"' X {} \;
