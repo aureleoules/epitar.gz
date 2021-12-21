@@ -68,6 +68,7 @@ wget \
     --content-disposition \
     --verbose \
     --reject-regex logout \
+    --reject-regex user \
     "https://moodle.cri.epita.fr"
 
 
