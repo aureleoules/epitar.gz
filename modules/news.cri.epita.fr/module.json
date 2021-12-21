@@ -1,0 +1,13 @@
+{
+    "name": "EPITA News",
+    "slug": "news",
+    "url": "https://news.infinity.study/",
+    "description": "Communiations internes officielles de l'EPITA",
+    "logo": "",
+    "authors": [
+        {
+            "name": "Aurele Oules",
+            "email": "aurele@oules.com"
+        }
+    ]
+}
