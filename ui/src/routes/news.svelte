@@ -22,14 +22,25 @@
 
 		// Retrieve url params
 		const urlParams = new URLSearchParams(window.location.search);
-		query = urlParams.get('q') || "";
-		newsgroup = urlParams.get('newsgroup') || "";
-		
+		query = urlParams.get('q') || '';
+		newsgroup = urlParams.get('newsgroup') || '';
+
 		// If query is set, search
 		if (query) {
 			search();
 		}
 	});
+
+	function hideKeyboard(element) {
+		element.attr('readonly', 'readonly'); // Force keyboard to hide on input field.
+		element.attr('disabled', 'true'); // Force keyboard to hide on textarea field.
+		setTimeout(function () {
+			element.blur(); //actually close the keyboard
+			// Remove readonly attribute after keyboard is hidden.
+			element.removeAttr('readonly');
+			element.removeAttr('disabled');
+		}, 100);
+	}
 
 	function search(concat: boolean = false) {
 		history.pushState(null, null, `/news?q=${query}&newsgroup=${newsgroup}`);
@@ -60,6 +71,7 @@
 
 	function onSubmit(e: Event) {
 		e.preventDefault();
+		hideKeyboard(document.getElementById('search'));
 	}
 </script>
 
@@ -73,6 +85,7 @@
 		<form on:submit={onSubmit}>
 			<label for="q">Query</label>
 			<input
+				id="search"
 				type="text"
 				name="q"
 				placeholder="piscine, traces evalexpr, 42sh..."
@@ -96,14 +109,20 @@
 			{#each results as result}
 				<article>
 					<header title={result.subject}>
-						<a target="_blank" href={`https://news.infinity.study/?news=${result.message_id}`}>{result.subject}</a>
+						<a target="_blank" href={`https://news.infinity.study/?news=${result.message_id}`}
+							>{result.subject}</a
+						>
 					</header>
 					<p>
 						{result.summary}
 					</p>
 					<footer>
-						{#each result.newsgroups.split(",") as g}
-							<a role="button" target="_blank" href={`https://news.infinity.study/?news=${result.message_id}`}>{g}</a>
+						{#each result.newsgroups.split(',') as g}
+							<a
+								role="button"
+								target="_blank"
+								href={`https://news.infinity.study/?news=${result.message_id}`}>{g}</a
+							>
 						{/each}
 					</footer>
 				</article>
