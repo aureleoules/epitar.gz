@@ -13,6 +13,7 @@ import (
 	"github.com/aureleoules/epitar/config"
 	"github.com/aureleoules/epitar/db"
 	"github.com/aureleoules/epitar/models"
+	"github.com/aureleoules/epitar/util"
 	"github.com/brpaz/echozap"
 	"github.com/expectedsh/go-sonic/sonic"
 	"github.com/labstack/echo/v4"
@@ -54,6 +55,7 @@ func Serve() {
 		if len(query) == 0 {
 			return c.JSON(http.StatusNotAcceptable, nil)
 		}
+		query = util.NormalizeText(query)
 
 		page, err := strconv.Atoi(c.QueryParam("page"))
 		if err != nil {
@@ -107,6 +109,8 @@ func Serve() {
 		if len(query) == 0 {
 			return c.JSON(http.StatusNotAcceptable, nil)
 		}
+
+		query = util.NormalizeText(query)
 
 		page, err := strconv.Atoi(c.QueryParam("page"))
 		if err != nil {
