@@ -1,16 +1,8 @@
-<script lang="ts">
-	import { variables } from '$lib/var';
+<script lang="ts" context="module">
 	import InfiniteScroll from 'svelte-infinite-scroll';
-	import { onMount } from 'svelte';
-
-	let newsgroups = [];
-	let page = 1;
-	let query = '';
-	let newsgroup = '';
-	let results = [];
-
-	onMount(async () => {
-		newsgroups = await fetch(`${variables.apiUrl}/newsgroups`)
+	import { variables } from '$lib/var';
+	export async function load({ fetch }) {
+		const newsgroups = await fetch(`${variables.apiUrl}/newsgroups`)
 			.then((res) => res.json())
 			.then((d) => {
 				return d;
@@ -19,7 +11,22 @@
 				console.error(e);
 				return [];
 			});
+		return {
+			props: { newsgroups }
+		};
+	}
+</script>
 
+<script lang="ts">
+	import { onMount } from 'svelte';
+
+	export let newsgroups = [];
+	let page = 1;
+	let query = '';
+	let newsgroup = '';
+	let results = [];
+
+	onMount(async () => {
 		// Retrieve url params
 		const urlParams = new URLSearchParams(window.location.search);
 		query = urlParams.get('q') || '';

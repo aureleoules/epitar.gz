@@ -1,11 +1,7 @@
-<script lang="ts">
+<script lang="ts" context="module">
 	import { variables } from '$lib/var';
-	import { onMount } from 'svelte';
-
-	let modules = [];
-
-	onMount(async () => {
-		modules = await fetch(`${variables.apiUrl}/modules`)
+	export async function load({ fetch }) {
+		const modules = await fetch(`${variables.apiUrl}/modules`)
 			.then((res) => res.json())
 			.then((d) => {
 				return d;
@@ -14,7 +10,14 @@
 				console.error(e);
 				return [];
 			});
-	});
+		return {
+			props: { modules }
+		};
+	}
+</script>
+
+<script lang="ts">
+	export let modules = [];
 </script>
 
 <div class="container">

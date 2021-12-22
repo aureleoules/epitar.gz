@@ -1,14 +1,10 @@
-<script lang="ts">
+<script lang="ts" context="module">
 	import '../app.css';
 	import filesize from 'filesize';
 	import HeartIcon from '../assets/svg/heart.svg?raw';
-	import { onMount } from 'svelte';
-
 	import { variables } from '$lib/var';
-	export let stats;
-
-	onMount(async () => {
-		stats = await fetch(`${variables.apiUrl}/stats`)
+	export async function load({ fetch }) {
+		const stats = await fetch(`${variables.apiUrl}/stats`)
 			.then((res) => res.json())
 			.then((d) => {
 				return d;
@@ -17,14 +13,21 @@
 				console.error(err);
 				return {};
 			});
-	});
+		return {
+			props: { stats }
+		};
+	}
+</script>
+
+<script lang="ts">
+	export let stats;
 </script>
 
 <nav>
 	<ul>
 		<li><strong>epitar.gz</strong></li>
-		<li><a href="/">Documents</a></li>
-		<li><a href="/news">News</a></li>
+		<li><a sveltekit:prefetch href="/">Documents</a></li>
+		<li><a sveltekit:prefetch href="/news">News</a></li>
 	</ul>
 	<ul>
 		<li><a href="/modules">Sources</a></li>

@@ -1,16 +1,8 @@
-<script lang="ts">
-	import { variables } from '$lib/var';
+<script lang="ts" context="module">
 	import InfiniteScroll from 'svelte-infinite-scroll';
-	import { onMount } from 'svelte';
-
-	let modules = [];
-	let page = 1;
-	let query = '';
-	let module = '';
-	let results = [];
-
-	onMount(async () => {
-		modules = await fetch(`${variables.apiUrl}/modules`)
+	import { variables } from '$lib/var';
+	export async function load({ fetch }) {
+		const modules = await fetch(`${variables.apiUrl}/modules`)
 			.then((res) => res.json())
 			.then((d) => {
 				return d;
@@ -19,7 +11,22 @@
 				console.error(e);
 				return [];
 			});
+		return {
+			props: { modules }
+		};
+	}
+</script>
 
+<script lang="ts">
+	import { onMount } from 'svelte';
+
+	export let modules = [];
+	let page = 1;
+	let query = '';
+	let module = '';
+	let results = [];
+
+	onMount(async () => {
 		// Retrieve url params
 		const urlParams = new URLSearchParams(window.location.search);
 		query = urlParams.get('q') || "";
