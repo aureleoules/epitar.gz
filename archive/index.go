@@ -16,6 +16,7 @@ import (
 	"github.com/aureleoules/epitar/config"
 	"github.com/aureleoules/epitar/db"
 	"github.com/aureleoules/epitar/models"
+	"github.com/aureleoules/epitar/util"
 	"github.com/expectedsh/go-sonic/sonic"
 	"github.com/fatih/color"
 	"go.uber.org/zap"
@@ -91,7 +92,7 @@ func (m *Module) indexDocument(path string) error {
 		return err
 	}
 
-	keywords = normalize(name) + " " + keywords
+	keywords = util.NormalizeText(name) + " " + keywords
 	zap.S().Infof("Pushing keywords... %s", name)
 	err = ingester.Push("files", "all", "key:"+key, keywords, "")
 	if err != nil {
