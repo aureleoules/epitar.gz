@@ -1,0 +1,13 @@
+{
+    "name": "Epinotes",
+    "slug": "epinotes",
+    "url": "https://epinotes.fr/",
+    "description": "Epinotes est une plateforme créée par des étudiants de l'EPITA Toulouse. Elle met à disposition de nombreuses ressources à plus d'un millier d'étudiants !",
+    "logo": "https://epinotes.fr/public/images/logos/epinotes_logo_7.png",
+    "authors": [
+        {
+            "name": "Aurele Oules",
+            "email": "aurele@oules.com"
+        }
+    ]
+}
