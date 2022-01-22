@@ -2,10 +2,10 @@ FROM node:16.2 as builder
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
-RUN npm install
+COPY package.json yarn.lock ./
+RUN yarn
 COPY . .
-RUN npm run build
+RUN yarn build
 
 FROM node:16.2.0-alpine3.13
 WORKDIR /app
