@@ -1,0 +1,13 @@
+{
+    "name": "Epiportal",
+    "slug": "epiportal",
+    "url": "https://github.com/Epiportal/epiportal.com",
+    "description": "EpiPortal's resource repository",
+    "logo": "",
+    "authors": [
+        {
+            "name": "Aurele Oules",
+            "email": "aurele@oules.com"
+        }
+    ]
+}
