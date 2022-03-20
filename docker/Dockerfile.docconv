@@ -1,4 +1,4 @@
-FROM golang:latest
+FROM golang:1.16
 
 RUN apt update
 RUN apt-get install -y zip
