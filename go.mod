@@ -3,7 +3,7 @@ module github.com/aureleoules/epitar
 go 1.16
 
 require (
-	code.sajari.com/docconv v1.2.0
+	code.sajari.com/docconv v1.3.5
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/briandowns/spinner v1.16.0
 	github.com/brpaz/echozap v1.1.2
@@ -24,7 +24,6 @@ require (
 	go.uber.org/multierr v1.7.0 // indirect
 	go.uber.org/zap v1.19.1
 	golang.org/x/text v0.3.7
-	google.golang.org/grpc v1.42.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )
 
